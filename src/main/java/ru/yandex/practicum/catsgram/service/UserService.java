@@ -3,12 +3,14 @@ package ru.yandex.practicum.catsgram.service;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
 import ru.yandex.practicum.catsgram.exception.DuplicatedDataException;
+import ru.yandex.practicum.catsgram.exception.NotFoundException;
 import ru.yandex.practicum.catsgram.model.User;
 
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -32,16 +34,16 @@ public class UserService {
     public User update(User user) {
         if (user.getId() == null) throw new ConditionsNotMetException("Id должен быть указан");
         User existUser = users.get(user.getId());
+        if (existUser == null) throw new NotFoundException("Пользователь с id = " + user.getId() + " не найден");
         if (!users.containsKey(existUser.getId())) throw new DuplicatedDataException("Этот имейл уже используется");
-        User oldUser = new User();
-        if (user.getEmail() != null && user.getUsername() != null && user.getPassword() != null) {
-            oldUser.setId(user.getId());
-            oldUser.setUsername(user.getUsername());
-            oldUser.setEmail(user.getEmail());
-            oldUser.setPassword(user.getPassword());
-            oldUser.setRegistrationDate(user.getRegistrationDate());
-        }
-        return oldUser;
+        if (user.getUsername() != null) existUser.setUsername(user.getUsername());
+        if (user.getPassword() != null) existUser.setPassword(user.getPassword());
+        if (user.getEmail() != null) existUser.setEmail(user.getEmail());
+        return existUser;
+    }
+
+    public Optional<User> findUserById(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     private long idGenerate() {
