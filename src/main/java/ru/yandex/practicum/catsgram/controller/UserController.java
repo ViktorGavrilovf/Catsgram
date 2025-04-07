@@ -22,7 +22,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getuserById(@PathVariable(value = "id") Long id) {
+    public User getUserById(@PathVariable(value = "id") Long id) {
         return userService.findUserById(id)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
     }
